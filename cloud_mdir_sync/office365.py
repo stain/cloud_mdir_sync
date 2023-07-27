@@ -526,7 +526,7 @@ class O365Mailbox(mailbox.Mailbox):
         self.mailbox = mailbox
         self.graph = graph
         graph.protocols.add("_CMS_")
-        self.max_fetches = asyncio.Semaphore(10)
+        self.max_fetches = asyncio.Semaphore(4)
 
     def __repr__(self):
         return f"<O365Mailbox at {id(self):x} for {self.graph.domain_id} {self.mailbox}>"
@@ -562,6 +562,7 @@ class O365Mailbox(mailbox.Mailbox):
         msgdb = self.msgdb
         msg.size = 0
         async with self.max_fetches:
+            await asyncio.sleep(0.1)
             with util.log_progress_ctx(
                     logging.DEBUG, f"Downloading {msg.email_id}",
                     lambda msg: f" {util.sizeof_fmt(msg.size)}",
